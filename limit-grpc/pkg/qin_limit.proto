@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+message XRateLimitCheckRequest {
+    // 在此架構下，各個microservice可以自訂他們的identity類別，
+    // 例如某些microservice可以僅提供ip為identity，某些microservice則提供ip跟user-agent的混合。
+    // 在這樣的情況下，也可以讓某些microservice去共用同種格式去做判別
+    // 例如 service_a 跟 service_b 共同使用ip作為identity的判別，
+    // 則 service_a 跟 service_b 就會有累加的作用
+    // 我認為這樣可以帶給系統較大的擴充彈性，如果是僅用某種語言寫在某個package內的middleware，
+    // 可能每換一種語言就會需要再重新寫一個，我認為這樣在維護上，會需要投入比較多的心力。
+    // 再者，如果是以一個像這樣的封閉包裝並僅開放某些端口的形式進行，就可以有一個比較統一的格式，
+    // 在多個microservice的架構中，或許能夠減少比較多的溝通協調時間。
+    string identity = 1;  
+}
+
+message XRateLimitCheckResponse {
+    string identity = 1;
+    int32 count = 2;
+    int32 remaining = 3;
+    bool is_allowed = 4;
+}
