@@ -37,12 +37,12 @@ func (xrl *XlimitRedisLayer) CheckAndIncrease(ctx context.Context, in *xlimit.XL
 	out.Identity = in.Identity
 	switch {
 	case err == redis.Nil || val == 0:
-		xrl.Set(ctx, key, increase, time.Hour*1)
+		res, setErr := xrl.Set(ctx, key, increase, time.Hour*1).Result()
 		out.IsAllowed = true
 		out.Timeleft = uint64(time.Hour) * 1
-		out.CountRemaining = xrl.LimitNum - val
-		log.Printf("Create New Identify(GRPC):%v -> Key(Redis):%v", in.GetIdentity(), key)
-		err = nil
+		out.CountRemaining = xrl.LimitNum - increase
+		log.Printf("Create New Identify(GRPC):%v -> Key(Redis):%v, Result:%v(Err:%v)", in.GetIdentity(), key, res, setErr)
+		err = setErr
 	case err != nil:
 		log.Printf("Check Get Count Failed: %v", err)
 	case val >= xrl.LimitNum:
@@ -54,11 +54,12 @@ func (xrl *XlimitRedisLayer) CheckAndIncrease(ctx context.Context, in *xlimit.XL
 		//err = LimitExceedError
 	default:
 		timeleft := xrl.TTL(ctx, key).Val()
-		xrl.Set(ctx, key, val+increase, time.Hour*1)
+		res, setErr := xrl.Set(ctx, key, val+increase, timeleft).Result()
 		out.IsAllowed = true
 		out.Timeleft = uint64(timeleft)
-		out.CountRemaining = xrl.LimitNum - val
-		log.Printf("%v(GRPC): <-> %v(Redis): ", in.GetIdentity(), key)
+		out.CountRemaining = xrl.LimitNum - val - increase
+		log.Printf("%v(GRPC) <-> %v(Redis), Result:%v(Err:%v)", in.GetIdentity(), key, res, setErr)
+		err = setErr
 	}
 	return key, out, err
 }
