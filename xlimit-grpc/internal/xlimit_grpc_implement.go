@@ -6,7 +6,7 @@ import (
 	"net"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/nucktwillieren/project-d/xlimit-grpc/internal/xlimit"
+	"github.com/nucktwillieren/project-d/xlimit-grpc/pkg/xlimit"
 	grpc "google.golang.org/grpc"
 )
 
@@ -14,10 +14,6 @@ type xLimitService struct {
 	xlimit.UnimplementedXLimitServer
 	Addr  string
 	layer *XlimitRedisLayer
-}
-
-type XLimitClientOptions struct {
-	Addr string
 }
 
 func (x *xLimitService) CheckAndIncrease(ctx context.Context, in *xlimit.XLimitCheckRequest) (*xlimit.XLimitCheckReply, error) {

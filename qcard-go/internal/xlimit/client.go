@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func NewClientWithConn(address string, identity string) *xlimit.XLimitClient {
+func NewClientWithConn(address string, identity string) *XLimitClient {
 
 	options := &internal.XLimitClientOptions{Addr: address}
 

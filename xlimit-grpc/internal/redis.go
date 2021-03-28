@@ -2,17 +2,14 @@ package internal
 
 import (
 	"context"
-	"errors"
 	"log"
 	"os"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"github.com/kelseyhightower/envconfig"
-	"github.com/nucktwillieren/project-d/xlimit-grpc/internal/xlimit"
+	"github.com/nucktwillieren/project-d/xlimit-grpc/pkg/xlimit"
 )
-
-var LimitExceedError = errors.New("Exceed The Limit Number")
 
 type XlimitRedisLayerOptions struct {
 	Prefix   string

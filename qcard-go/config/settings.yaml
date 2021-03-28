@@ -1,0 +1,6 @@
+db:
+  tornado:
+    addr: "project-d-qcard-pg:5432"
+    user: qcardu
+    password: qcardnumba1
+    database: qcard

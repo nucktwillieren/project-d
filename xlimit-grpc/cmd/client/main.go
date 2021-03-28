@@ -6,8 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/nucktwillieren/project-d/xlimit-grpc/internal"
-	"github.com/nucktwillieren/project-d/xlimit-grpc/internal/xlimit"
+	"github.com/nucktwillieren/project-d/xlimit-grpc/pkg/xlimit"
 
 	"google.golang.org/grpc"
 )
@@ -25,7 +24,7 @@ func main() {
 
 	log.Printf("Test(%v:%v): %v times", address, identity, times)
 
-	options := &internal.XLimitClientOptions{Addr: address}
+	options := &xlimit.XLimitClientOptions{Addr: address}
 
 	conn, err := grpc.Dial(options.Addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -39,7 +38,7 @@ func main() {
 	defer cancel()
 	for i := 0; i < times; i++ {
 		r, err := c.CheckAndIncrease(ctx, &xlimit.XLimitCheckRequest{Identity: identity, IncreaseNumber: 1})
-		if err != nil && err != internal.LimitExceedError {
+		if err != nil && err != xlimit.LimitExceedError {
 			log.Fatalf("could not check: %v", err)
 		}
 

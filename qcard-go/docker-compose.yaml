@@ -1,0 +1,34 @@
+version: "3.9"
+
+volumes:
+  qcard-pg-data:
+
+services:
+  qcard-pg:
+    container_name: project-d-qcard-pg
+    image: postgres
+    environment:
+    - POSTGRES_PASSWORD=qcardnumba1
+    - POSTGRES_DB=qcard
+    - POSTGRES_USER=qcardu
+    ports:
+    - ":5432"
+    volumes:
+    - qcard-pg-data:/var/lib/postgresql/data/        
+    restart: unless-stopped
+  qcard-go:
+    container_name: project-d-qcard-go
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    working_dir: /server
+    volumes:
+      - ./cmd:/server/cmd
+      - ./internal:/server/internal
+      - ./pkg:/server/pkg
+      - ./conf:/server/conf
+      - ./templates:/server/templates
+    ports:
+      - ":8080"
+    entrypoint: go run /server/cmd/server/main.go
+    restart: always
