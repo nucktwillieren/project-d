@@ -1,12 +1,14 @@
 - Dcard 每天午夜都有大量使用者湧入抽卡，為了不讓伺服器過載，請設計一個 middleware：
+  - Deadline: 4/5
   - 限制每小時來自同一個 IP 的請求數量不得超過 1000
     - 如何才會讓這個請求數量1000判斷比較合理?
       - 是否應當將載入static files or media files的請求也算入? 這樣是否合理? middleware介入的位置? 或者何種架構可以避免算入這種情況? 使用特定且和此middleware隔離的CDN Server?
       - 除了IP，是否應有更多判斷考量? 有些用戶可能是使用租屋處的網路，若是在租屋處共有的Public IP的情況下使用，假使某段時間該租屋處的IP使用正好加起來超過1000，並封鎖，此情況是否合理? 
-      - 
+      - 所謂每個小時?
+        - 移動的一個小時?
+        - 每個小時刷新一次總數?
   - 在 response headers 中加入剩餘的請求數量 (X-RateLimit-Remaining) 以及 rate limit 歸零的時間(X-RateLimit-Reset)
   - 如果超過限制的話就回傳 429 (Too Many Requests)
   - 可以使用各種資料庫達成
     - in-memory database或許是一個比較好的選擇
     - 
-  - Deadline: 4/5

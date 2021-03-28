@@ -1,6 +1,13 @@
 syntax = "proto3";
 
-message XRateLimitCheckRequest {
+option go_package = "github.com/nucktwillieren/project-d/qin-limit-grpc;xlimit";
+
+service XLimit {
+    rpc CheckAndIncrease(XLimitCheckRequest) returns (XLimitCheckReply) {}
+    rpc Reset(XLimitResetRequest) returns (XLimitCheckReply) {}
+}
+
+message XLimitCheckRequest {
     // 在此架構下，各個microservice可以自訂他們的identity類別，
     // 例如某些microservice可以僅提供ip為identity，某些microservice則提供ip跟user-agent的混合。
     // 在這樣的情況下，也可以讓某些microservice去共用同種格式去做判別
@@ -11,11 +18,16 @@ message XRateLimitCheckRequest {
     // 再者，如果是以一個像這樣的封閉包裝並僅開放某些端口的形式進行，就可以有一個比較統一的格式，
     // 在多個microservice的架構中，或許能夠減少比較多的溝通協調時間。
     string identity = 1;  
+    uint64 increase_number = 2;
 }
 
-message XRateLimitCheckResponse {
+message XLimitResetRequest {
     string identity = 1;
-    int32 count = 2;
-    int32 remaining = 3;
+}
+
+message XLimitCheckReply {
+    string identity = 1;
+    uint64 count_remaining = 2;
+    uint64 timeleft = 3;
     bool is_allowed = 4;
 }
