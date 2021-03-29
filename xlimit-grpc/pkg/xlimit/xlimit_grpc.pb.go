@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type XLimitClient interface {
 	CheckAndIncrease(ctx context.Context, in *XLimitCheckRequest, opts ...grpc.CallOption) (*XLimitCheckReply, error)
+	Get(ctx context.Context, in *XLimitGetRequest, opts ...grpc.CallOption) (*XLimitGetReply, error)
 	Reset(ctx context.Context, in *XLimitResetRequest, opts ...grpc.CallOption) (*XLimitCheckReply, error)
 }
 
@@ -39,6 +40,15 @@ func (c *xLimitClient) CheckAndIncrease(ctx context.Context, in *XLimitCheckRequ
 	return out, nil
 }
 
+func (c *xLimitClient) Get(ctx context.Context, in *XLimitGetRequest, opts ...grpc.CallOption) (*XLimitGetReply, error) {
+	out := new(XLimitGetReply)
+	err := c.cc.Invoke(ctx, "/XLimit/Get", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *xLimitClient) Reset(ctx context.Context, in *XLimitResetRequest, opts ...grpc.CallOption) (*XLimitCheckReply, error) {
 	out := new(XLimitCheckReply)
 	err := c.cc.Invoke(ctx, "/XLimit/Reset", in, out, opts...)
@@ -53,6 +63,7 @@ func (c *xLimitClient) Reset(ctx context.Context, in *XLimitResetRequest, opts .
 // for forward compatibility
 type XLimitServer interface {
 	CheckAndIncrease(context.Context, *XLimitCheckRequest) (*XLimitCheckReply, error)
+	Get(context.Context, *XLimitGetRequest) (*XLimitGetReply, error)
 	Reset(context.Context, *XLimitResetRequest) (*XLimitCheckReply, error)
 	mustEmbedUnimplementedXLimitServer()
 }
@@ -63,6 +74,9 @@ type UnimplementedXLimitServer struct {
 
 func (UnimplementedXLimitServer) CheckAndIncrease(context.Context, *XLimitCheckRequest) (*XLimitCheckReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckAndIncrease not implemented")
+}
+func (UnimplementedXLimitServer) Get(context.Context, *XLimitGetRequest) (*XLimitGetReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
 }
 func (UnimplementedXLimitServer) Reset(context.Context, *XLimitResetRequest) (*XLimitCheckReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Reset not implemented")
@@ -98,6 +112,24 @@ func _XLimit_CheckAndIncrease_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _XLimit_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(XLimitGetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(XLimitServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/XLimit/Get",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(XLimitServer).Get(ctx, req.(*XLimitGetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _XLimit_Reset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(XLimitResetRequest)
 	if err := dec(in); err != nil {
@@ -128,10 +160,14 @@ var XLimit_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _XLimit_CheckAndIncrease_Handler,
 		},
 		{
+			MethodName: "Get",
+			Handler:    _XLimit_Get_Handler,
+		},
+		{
 			MethodName: "Reset",
 			Handler:    _XLimit_Reset_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/xlimit/xlimit.proto",
+	Metadata: "pkg/xlimit/xlimit.proto",
 }

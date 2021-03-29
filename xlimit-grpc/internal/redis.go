@@ -17,7 +17,7 @@ type XlimitRedisLayerOptions struct {
 }
 
 type XlimitRedisLayer struct {
-	*redis.Client
+	client *redis.Client
 	*XlimitRedisLayerOptions
 }
 
@@ -29,12 +29,12 @@ init_expiration: 1 hour.
 */
 func (xrl *XlimitRedisLayer) CheckAndIncrease(ctx context.Context, in *xlimit.XLimitCheckRequest, out *xlimit.XLimitCheckReply) (string, *xlimit.XLimitCheckReply, error) {
 	key := xrl.Prefix + ":" + in.GetIdentity()
-	val, err := xrl.Get(ctx, key).Uint64()
+	val, err := xrl.client.Get(ctx, key).Uint64()
 	increase := in.GetIncreaseNumber()
 	out.Identity = in.Identity
 	switch {
 	case err == redis.Nil || val == 0:
-		res, setErr := xrl.Set(ctx, key, increase, time.Hour*1).Result()
+		res, setErr := xrl.client.Set(ctx, key, increase, time.Hour*1).Result()
 		out.IsAllowed = true
 		out.Timeleft = uint64(time.Hour) * 1
 		out.CountRemaining = xrl.LimitNum - increase
@@ -43,15 +43,15 @@ func (xrl *XlimitRedisLayer) CheckAndIncrease(ctx context.Context, in *xlimit.XL
 	case err != nil:
 		log.Printf("Check Get Count Failed: %v", err)
 	case val >= xrl.LimitNum:
-		timeleft := xrl.TTL(ctx, key).Val()
+		timeleft := xrl.client.TTL(ctx, key).Val()
 		out.IsAllowed = false
 		out.Timeleft = uint64(timeleft)
 		out.CountRemaining = xrl.LimitNum - val
 		log.Printf("%v(GRPC): <-> %v(Redis): Exceed The Limit Number(Reset:%v)", in.GetIdentity(), key, timeleft)
 		//err = LimitExceedError
 	default:
-		timeleft := xrl.TTL(ctx, key).Val()
-		res, setErr := xrl.Set(ctx, key, val+increase, timeleft).Result()
+		timeleft := xrl.client.TTL(ctx, key).Val()
+		res, setErr := xrl.client.Set(ctx, key, val+increase, timeleft).Result()
 		out.IsAllowed = true
 		out.Timeleft = uint64(timeleft)
 		out.CountRemaining = xrl.LimitNum - val - increase
@@ -61,9 +61,40 @@ func (xrl *XlimitRedisLayer) CheckAndIncrease(ctx context.Context, in *xlimit.XL
 	return key, out, err
 }
 
+func (xrl *XlimitRedisLayer) Get(ctx context.Context, in *xlimit.XLimitGetRequest, out *xlimit.XLimitGetReply) (*xlimit.XLimitGetReply, error) {
+	iter := xrl.client.Scan(ctx, 0, xrl.Prefix+":"+in.GetIdentity(), 0).Iterator()
+	for iter.Next(ctx) {
+		key := iter.Val()
+		val, err := xrl.client.Get(ctx, key).Uint64()
+		timeleft := xrl.client.TTL(ctx, key).Val()
+		switch {
+		case err != nil:
+			log.Printf("Check Get Count Failed: %v", err)
+		case err == redis.Nil || val == 0:
+		default:
+			result := xlimit.XLimitCheckReply{Identity: key, CountRemaining: xrl.LimitNum - val, Timeleft: uint64(timeleft), IsAllowed: xrl.LimitNum <= val}
+			out.Results = append(out.Results, &result)
+		}
+	}
+	err := iter.Err()
+	log.Printf("%v", out)
+	return out, err
+}
+
+func (xrl *XlimitRedisLayer) GetKeysOnly(ctx context.Context, in *xlimit.XLimitGetRequest, out *xlimit.XLimitGetReply) (*xlimit.XLimitGetReply, error) {
+	iter := xrl.client.Scan(ctx, 0, xrl.Prefix+":"+in.GetIdentity(), 0).Iterator()
+	for iter.Next(ctx) {
+		result := xlimit.XLimitCheckReply{Identity: iter.Val()}
+		out.Results = append(out.Results, &result)
+	}
+	err := iter.Err()
+	log.Printf("%v", out)
+	return out, err
+}
+
 func NewXlimitRedisLayer(client *redis.Client, options *XlimitRedisLayerOptions) *XlimitRedisLayer {
 	return &XlimitRedisLayer{
-		Client:                  client,
+		client:                  client,
 		XlimitRedisLayerOptions: options,
 	}
 }

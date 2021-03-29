@@ -4,6 +4,7 @@ option go_package = "github.com/nucktwillieren/project-d/qin-limit-grpc;xlimit";
 
 service XLimit {
     rpc CheckAndIncrease(XLimitCheckRequest) returns (XLimitCheckReply) {}
+    rpc Get(XLimitGetRequest) returns(XLimitGetReply) {}
     rpc Reset(XLimitResetRequest) returns (XLimitCheckReply) {}
 }
 
@@ -30,4 +31,13 @@ message XLimitCheckReply {
     uint64 count_remaining = 2;
     uint64 timeleft = 3;
     bool is_allowed = 4;
+}
+
+message XLimitGetRequest{
+    string identity = 1; // if identity == "*" -> Get all keys.
+    bool keys_only = 2;
+}
+
+message XLimitGetReply{
+    repeated XLimitCheckReply results = 1;
 }

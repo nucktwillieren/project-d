@@ -13,13 +13,24 @@ import (
 type xLimitService struct {
 	xlimit.UnimplementedXLimitServer
 	Addr  string
-	layer *XlimitRedisLayer
+	layer *XlimitRedisLayer // I think, someday, we will use redis and the other databases for this service simultaneously, so using this pattern.
 }
 
 func (x *xLimitService) CheckAndIncrease(ctx context.Context, in *xlimit.XLimitCheckRequest) (*xlimit.XLimitCheckReply, error) {
 	out := &xlimit.XLimitCheckReply{}
 	_, out, err := x.layer.CheckAndIncrease(ctx, in, out)
 	log.Println(out)
+	return out, err
+}
+
+func (x *xLimitService) Get(ctx context.Context, in *xlimit.XLimitGetRequest) (out *xlimit.XLimitGetReply, err error) {
+	out = &xlimit.XLimitGetReply{}
+	log.Println(in.GetKeysOnly())
+	if in.GetKeysOnly() {
+		out, err = x.layer.GetKeysOnly(ctx, in, out)
+	} else {
+		out, err = x.layer.Get(ctx, in, out)
+	}
 	return out, err
 }
 
