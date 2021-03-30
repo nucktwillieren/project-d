@@ -3,22 +3,23 @@ package xlimit
 import (
 	"log"
 
-	"github.com/nucktwillieren/project-d/xlimit-grpc/internal"
-	"github.com/nucktwillieren/project-d/xlimit-grpc/internal/xlimit"
-
 	"google.golang.org/grpc"
 )
 
+type XLimitClientOptions struct {
+	Addr string
+}
+
 func NewClientWithConn(address string, identity string) *XLimitClient {
 
-	options := &internal.XLimitClientOptions{Addr: address}
+	options := &XLimitClientOptions{Addr: address}
 
 	conn, err := grpc.Dial(options.Addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		conn.Close()
 		log.Fatalf("did not connect: %v", err)
 	}
-	c := xlimit.NewXLimitClient(conn)
+	c := NewXLimitClient(conn)
 
 	return &c
 }
