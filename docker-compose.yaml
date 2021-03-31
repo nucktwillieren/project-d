@@ -1,4 +1,4 @@
-version: '3.4'
+version: '3.9'
     
 services:
   nginx:
@@ -10,103 +10,24 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ../nginx:/etc/nginx/conf.d
-      - ../certbot/conf:/etc/letsencrypt
-      - ../certbot/www:/var/www/certbot
+      - ./nginx:/etc/nginx/conf.d
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     restart: unless-stopped
     command: /bin/sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g 'daemon off;'"
-  certbot:
-    container_name: project-d-certbot
-    image: certbot/certbot
-    networks:
-      - project-d-network
-    volumes:
-      - ../certbot/conf:/etc/letsencrypt
-      - ../certbot/www:/var/www/certbot
-    restart: unless-stopped
-    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 24h & wait $${!}; done;" # 💡
-    depends_on:
-      - nginx
-  qcard-go:
-    container_name: project-d-qcard-go
-    build:
-      context: ../../
-      dockerfile: Dockerfile
-    working_dir: /server
-    networks:
-    - project-d-network
-    volumes:
-      - ./qin-limit/cmd:/server/cmd
-      - ./qin-limit/internal:/server/internal
-      - ./qin-limit/pkg:/server/pkg
-    ports:
-      - "8080:8080"
-    entrypoint: go run /server/cmd/server/main.go
-    restart: always
   qcard-frontend:
-    container_name: project-d-qcard-go
+    container_name: project-d-qcard-frontend
     build:
-      context: ../../
+      context: ./qcard_frontend/
       dockerfile: Dockerfile
-    working_dir: /server
-    networks:
-    - project-d-network
+    working_dir: /frontend
     volumes:
-      - ./qin-limit/cmd:/server/cmd
-      - ./qin-limit/internal:/server/internal
-      - ./qin-limit/pkg:/server/pkg
-    ports:
-      - "8080:8080"
-    entrypoint: go run /server/cmd/server/main.go
-    restart: always
-  pg:
-    image: redis
-    container_name: project-d-redis
-    entrypoint: [/bin/sh,-c,'while true; do sleep 300 done']
-    depends_on:
-      - go
+      - ./qcard_frontend/public:/frontend/public
+      - ./qcard_frontend/src:/frontend/src
+    entrypoint: npm start
     networks:
       - project-d-network
-  qcard-migration-tool:
-    container_name: project-d-qcard-go
-    build:
-      context: ../../
-      dockerfile: Dockerfile
-    working_dir: /server
-    networks:
-    - project-d-network
-    volumes:
-      - ./qin-limit/cmd:/server/cmd
-      - ./qin-limit/internal:/server/internal
-      - ./qin-limit/pkg:/server/pkg
-    ports:
-      - "8080:8080"
-    entrypoint: go run /server/cmd/server/main.go
     restart: always
-  limit-grpc:
-    container_name: project-d-limit-grpc
-    build:
-      context: ../../
-      dockerfile: Dockerfile
-    working_dir: /server
-    networks:
-    - project-d-network
-    volumes:
-      - ./qin-limit/cmd:/server/cmd
-      - ./qin-limit/internal:/server/internal
-      - ./qin-limit/pkg:/server/pkg
-    ports:
-      - "8080:8080"
-    entrypoint: go run /server/cmd/server/main.go
-    restart: always
-  redis:
-    image: redis
-    container_name: project-d-redis
-    entrypoint: [/bin/sh,-c,'while true; do sleep 300 done']
-    depends_on:
-      - go
-    networks:
-      - project-d-network
 
 networks:
   project-d-network:

@@ -99,7 +99,7 @@ func Registration(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, "Wrong Format")
 		return
 	}
-	//if exists, err := CheckUsernameDuplicated(){
+	//if exists, err := CheckUsernameDuplicated(); exists || err != nil {
 	//
 	//}
 	GetLoginToken(c, payload.Username)
