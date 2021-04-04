@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
 import "./Login.css"
+import { Redirect } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { getUser, userLogout } from '../../api/auth'
 
@@ -8,14 +8,13 @@ const Logout = () => {
   const user = getUser();
   let history = useHistory();
 
-  useEffect(() => {
-    if (user) {
-      userLogout()
-      history.push("/")
-    }
-  })
+  if (user) {
+    userLogout()
+    history.push("/")
+  }
+
   return (
-    <></>
+    <Redirect to="/"></Redirect>
   )
 }
 
