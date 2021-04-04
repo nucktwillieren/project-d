@@ -8,20 +8,20 @@ services:
     container_name: project-d-qcard-pg
     image: postgres
     profiles:
-      - "pg"
+      - "qcard"
     environment:
-    - POSTGRES_PASSWORD=qcardnumba1
-    - POSTGRES_DB=qcard
-    - POSTGRES_USER=qcardu
+      - POSTGRES_PASSWORD=qcardnumba1
+      - POSTGRES_DB=qcard
+      - POSTGRES_USER=qcardu
     ports:
-    - "54325:5432"
+      - "54325:5432"
     volumes:
-    - qcard-pg-data:/var/lib/postgresql/data/        
+      - qcard-pg-data:/var/lib/postgresql/data/
     restart: unless-stopped
   qcard-go:
     container_name: project-d-qcard-go
     profiles:
-      - "go"
+      - "qcard"
     build:
       context: ./
       dockerfile: Dockerfile
@@ -38,3 +38,4 @@ services:
     restart: always
     environment:
       QCARD_GO_DB_CONFIG_PATH: "conf/settings.yaml"
+      XLIMIT_GRPC_ADDR: "project-d-xlimit-grpc:50031"

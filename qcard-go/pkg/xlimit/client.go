@@ -10,7 +10,7 @@ type XLimitClientOptions struct {
 	Addr string
 }
 
-func NewClientWithConn(address string, identity string) *XLimitClient {
+func NewClientWithConn(address string) *XLimitClient {
 
 	options := &XLimitClientOptions{Addr: address}
 

@@ -1,1 +1,15 @@
 version: "3.9"
+
+services:
+  migration_tool:
+    container_name: migration_tool
+    build: ./
+    command: bash entrypoint.sh
+    volumes:
+      - ./:/migration_tool/
+    environment:
+      DBHOST: "127.0.0.1"
+      DBPORT: 54325
+      DBNAME: qcard
+      DBUSER: qcardu
+      DBPASS: qcardnumba1

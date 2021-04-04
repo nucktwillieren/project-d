@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,8 +14,8 @@ func GetUser(c *gin.Context) {
 	db := c.MustGet("db-params").(db.DBParams)
 
 	db.PG.Model(&userModel).Where("username = ?", c.Param("username")).Relation("Friends").Relation("Pairing").Select()
-	log.Println(userModel.Username, auth.GetUsername(c))
 	if userModel.Username == auth.GetUsername(c) {
+		// Make sure the user is the same as the one carried by JWT
 		c.JSON(http.StatusOK, userModel)
 	}
 }

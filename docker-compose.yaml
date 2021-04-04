@@ -1,7 +1,13 @@
-version: '3.9'
-    
+version: "3.9"
+
+volumes:
+  qcard-pg-data:
+
 services:
   nginx:
+    profiles:
+      - "frontend"
+      - "all"
     container_name: project-d-nginx
     image: nginx
     networks:
@@ -16,6 +22,9 @@ services:
     restart: unless-stopped
     command: /bin/sh -c "while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g 'daemon off;'"
   qcard-frontend:
+    profiles:
+      - "frontend"
+      - "all"
     container_name: project-d-qcard-frontend
     build:
       context: ./qcard_frontend/
@@ -28,6 +37,49 @@ services:
     networks:
       - project-d-network
     restart: always
+  qcard-go:
+    profiles:
+      - "qcard"
+      - "all"
+    extends:
+      file: ./qcard-go/docker-compose.yaml
+      service: qcard-go
+  qcard-pg:
+    profiles:
+      - "qcard"
+      - "all"
+    extends:
+      file: ./qcard-go/docker-compose.yaml
+      service: qcard-pg
+  xlimit-redis:
+    profiles:
+      - "xlimit"
+      - "all"
+    extends:
+      file: ./xlimit-grpc/docker-compose.yaml
+      service: xlimit-redis
+  xlimit-grpc:
+    profiles:
+      - "xlimit"
+      - "all"
+    extends:
+      file: ./xlimit-grpc/docker-compose.yaml
+      service: xlimit-grpc
+  migration_tool:
+    profiles:
+      - "migration"
+      - "all"
+    extends:
+      file: ./qcard_migration_tool/docker-compose.yaml
+      service: migration_tool
+    depends_on:
+      - "qcard-pg"
+    environment:
+      DBHOST: "project-d-qcard-pg"
+      DBPORT: 5432
+      DBNAME: qcard
+      DBUSER: qcardu
+      DBPASS: qcardnumba1
 
 networks:
   project-d-network:

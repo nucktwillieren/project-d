@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,12 +32,12 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    #'django.contrib.admin',
-    #'django.contrib.auth',
-    #'django.contrib.contenttypes',
-    #'django.contrib.sessions',
-    #'django.contrib.messages',
-    #'django.contrib.staticfiles',
+    # 'django.contrib.admin',
+    # 'django.contrib.auth',
+    # 'django.contrib.contenttypes',
+    # 'django.contrib.sessions',
+    # 'django.contrib.messages',
+    # 'django.contrib.staticfiles',
     "qcard",
 ]
 
@@ -74,16 +75,18 @@ WSGI_APPLICATION = 'qcard_migration_tool.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': "qcard",
-        'USER': "qcardu",
-        'PASSWORD': "qcardnumba1",
-        'HOST': "127.0.0.1",
-        'PORT': 54325,
+        'NAME': os.getenv("DBNAME"),
+        'USER': os.getenv("DBUSER"),
+        'PASSWORD': os.getenv("DBPASS"),
+        'HOST': os.getenv("DBHOST"),
+        'PORT': int(os.getenv("DBPORT")),
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

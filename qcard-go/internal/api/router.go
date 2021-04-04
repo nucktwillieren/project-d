@@ -11,14 +11,17 @@ import (
 	"github.com/nucktwillieren/project-d/qcard-go/internal/api/handler"
 	"github.com/nucktwillieren/project-d/qcard-go/pkg/auth"
 	"github.com/nucktwillieren/project-d/qcard-go/pkg/db"
+	"github.com/nucktwillieren/project-d/qcard-go/pkg/xlimit"
 )
 
 var (
-	dbMap map[string]*pg.DB
+	dbMap        map[string]*pg.DB
+	xLimitClient *xlimit.XLimitClient
 )
 
 func init() {
 	dbMap = db.YamlToPGOptions(os.Getenv("QCARD_GO_DB_CONFIG_PATH"))
+	xLimitClient = xlimit.NewClientWithConn((os.Getenv("XLIMIT_GRPC_ADDR")))
 }
 
 func Setup() *gin.Engine {
@@ -36,21 +39,47 @@ func Setup() *gin.Engine {
 	}))
 
 	v1 := RouterBase.Group("api/v1/")
+	v1.Use(db.SetDBParams(db.DBParams{PG: dbMap["qcard"]}))
 	{
 		authGroup := v1.Group("auth/")
 		authGroup.Use(auth.SetJWTParams(auth.JWTParams{Secret: secret}))
-		authGroup.Use(db.SetDBParams(db.DBParams{PG: dbMap["qcard"]}))
 		{
 			authGroup.POST("login", handler.Login)
 			authGroup.POST("registration", handler.Registration)
 		}
 
-		user := v1.Group("user/")
-		user.Use(db.SetDBParams(db.DBParams{PG: dbMap["qcard"]}))
-		user.Use(auth.JwtAuthMiddleware("Authorization", "Bearer", secret, "unknown"))
-		user.Use(auth.JwtAnonymousUserForbbiden("unknown"))
+		jwtProtectedGroup := v1.Group("")
+		jwtProtectedGroup.Use(auth.JwtAuthMiddleware("Authorization", "Bearer", secret, "unknown"))
+		jwtProtectedGroup.Use(auth.JwtAnonymousUserForbbiden("unknown"))
 		{
-			user.GET(":username", handler.GetUser)
+			user := jwtProtectedGroup.Group("user/")
+			{
+				user.GET(":username", handler.GetUser)
+			}
+
+			post := jwtProtectedGroup.Group("post/")
+			{
+				post.POST("", handler.CreatePost)
+				post.GET(":id")
+			}
+
+			category := jwtProtectedGroup.Group("category/")
+			{
+				category.POST("", handler.CreateCategory)
+			}
+
+			pair := jwtProtectedGroup.Group("pair")
+			{
+				pair.GET("", xlimit.XlimitMiddleware(xLimitClient, ""), handler.GetPair)
+			}
+		}
+
+		noAuthGroup := v1.Group("")
+		{
+			post := noAuthGroup.Group("category/")
+			{
+				post.GET("", handler.GetAllCategory)
+			}
 		}
 
 		//admin := v1.Group("admin/")
