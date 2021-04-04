@@ -7,6 +7,7 @@ const initialState = {
 
 export const SET_TOKEN = "SET_TOKEN"
 export const SET_USER = "SET_USER"
+export const LOGOUT = "LOGOUT"
 
 const rootReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -21,6 +22,12 @@ const rootReducer = (state = initialState, action) => {
       return {
         ...state,
         user: action.payload
+      }
+    case LOGOUT:
+      localStorage.removeItem("user")
+      localStorage.removeItem("token")
+      return {
+        initialState
       }
     default:
       return state
