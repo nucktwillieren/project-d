@@ -17,18 +17,18 @@ const App = () => {
     user = initialUser
   }
   return (
-    <div className="App" className="">
+    <div className="App">
       <header className="App-header">
       </header>
       <BrowserRouter>
         <TopNav user={user}></TopNav>
         <Switch>
-          <Route path="/login" component={Login}>
+          <Route path="/login">
             <RedirectIfAuth>
               <Login></Login>
             </RedirectIfAuth>
           </Route>
-          <Route path="/register" component={Login}>
+          <Route path="/register">
             <RedirectIfAuth>
               <Registration></Registration>
             </RedirectIfAuth>
