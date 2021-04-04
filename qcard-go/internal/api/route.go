@@ -10,16 +10,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/nucktwillieren/project-d/qcard-go/internal/api/handler"
 	"github.com/nucktwillieren/project-d/qcard-go/pkg/auth"
-	"github.com/nucktwillieren/project-d/qcard-go/pkg/config"
+	"github.com/nucktwillieren/project-d/qcard-go/pkg/db"
 )
 
 var (
-	db map[string]*pg.DB
+	dbMap map[string]*pg.DB
 )
 
 func init() {
-	db = config.YamlToPGOptions(os.Getenv("QCARD_GO_DB_CONFIG_PATH"))
-
+	dbMap = db.YamlToPGOptions(os.Getenv("QCARD_GO_DB_CONFIG_PATH"))
 }
 
 func Setup() *gin.Engine {
@@ -39,11 +38,21 @@ func Setup() *gin.Engine {
 	v1 := RouterBase.Group("api/v1/")
 	{
 		authGroup := v1.Group("auth/")
-		authGroup.Use(auth.SetBaseParams(auth.JWTParams{Secret: secret}))
+		authGroup.Use(auth.SetJWTParams(auth.JWTParams{Secret: secret}))
+		authGroup.Use(db.SetDBParams(db.DBParams{PG: dbMap["qcard"]}))
 		{
 			authGroup.POST("login", handler.Login)
 			authGroup.POST("registration", handler.Registration)
 		}
+
+		user := v1.Group("user/")
+		user.Use(db.SetDBParams(db.DBParams{PG: dbMap["qcard"]}))
+		{
+
+		}
+
+		//admin := v1.Group("admin/")
 	}
+
 	return RouterBase
 }

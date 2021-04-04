@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"reflect"
 )
 
 func GetRandomString(n int) string {
@@ -21,4 +22,8 @@ func StrIn(s string, a []string) bool {
 		}
 	}
 	return false
+}
+
+func PointerCheck(v interface{}) bool {
+	return reflect.ValueOf(v).Kind() == reflect.Ptr
 }

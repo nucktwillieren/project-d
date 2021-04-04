@@ -14,7 +14,6 @@ const App = () => {
   useEffect(() => {
     setToken(getToken());
     setUser(getUser());
-    console.log("hi")
   })
 
   return (

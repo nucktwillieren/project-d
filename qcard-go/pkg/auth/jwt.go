@@ -17,24 +17,6 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-type JWTParams struct {
-	Account string
-	Role    string
-	Scope   string
-	Aud     string
-	Exp     int64
-	Issur   string
-	Nbf     int64
-	Subject string
-	Secret  []byte
-}
-
-func SetBaseParams(params JWTParams) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Set("jwt-params", params)
-	}
-}
-
 func NewJwt(account string, role string, scope string, aud string, exp int64, issuer string, nbf int64, subject string, secret []byte) string {
 	now := time.Now()
 	jwtID := account + strconv.FormatInt(now.Unix(), 10)

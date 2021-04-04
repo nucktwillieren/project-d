@@ -40,7 +40,7 @@ const Registration = () => {
     if (token) {
       history.push("/")
     }
-  }, [])
+  })
 
   useEffect(() => {
     if (password !== password_second) {
