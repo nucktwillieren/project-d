@@ -47,8 +47,10 @@ func Setup() *gin.Engine {
 
 		user := v1.Group("user/")
 		user.Use(db.SetDBParams(db.DBParams{PG: dbMap["qcard"]}))
+		user.Use(auth.JwtAuthMiddleware("Authorization", "Bearer", secret, "unknown"))
+		user.Use(auth.JwtAnonymousUserForbbiden("unknown"))
 		{
-
+			user.GET(":username", handler.GetUser)
 		}
 
 		//admin := v1.Group("admin/")
