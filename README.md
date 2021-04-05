@@ -76,5 +76,17 @@ docker-compose --profile all up --build
   - 儲存xlimit-rate的count，即題目所要求
 - project-d-xlimit-grpc
   - 連接project-d-xlimit-redis，並透過grpc server跟外處溝通
+  - 在此container的資料夾中，
+    -  cmd資料夾的client可以做單一identity的request test
+    -  cmd資料夾的random-create可以隨機產生identiy進行request test
+    -  cmd資料夾的get可以取得所有key跟value   
 - project-d-migration_tool
   - 利用python scripts快速的建立Table與column及constraint
+
+## 解釋
+### 為何先透過grpc的一層封裝將redis DB藏在grpc server後方
+- 在分散式的系統中，我們可能會需要把關存取redis的關口，而grpc server恰好可以做到這件事情
+- grpc速度比restful快
+### 為何在redis中是直接使用SET而不是HSET
+- 因為SET有EX(expire time)的選項
+- key儲存為該個人資訊，利用EX作為倒數計時
