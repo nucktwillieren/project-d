@@ -47,6 +47,8 @@ cd project-d
 docker-compose --profile all up --build 
 ```
 
+Build完之後，因為Nginx的關係，他能將port 80導到frontend的port上，因此直接在瀏覽器輸入 http://127.0.0.1 或 http://localhost 就可以連上frontend
+
 ## 架構說明
 ### Docker Containers
 - project-d-nginx
