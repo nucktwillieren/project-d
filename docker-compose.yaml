@@ -46,6 +46,7 @@ services:
       service: qcard-go
   qcard-pg:
     profiles:
+      - "migration"
       - "qcard"
       - "all"
     extends:

@@ -21,19 +21,19 @@ type Category struct {
 
 type Post struct {
 	ID          uint      `json:"id"`
-	Creator     User      `pg:"rel:has-one" json:"creator"`
-	Category    Category  `pg:"rel:has-one" json:"category"`
+	Creator     *User     `pg:"rel:has-one" json:"creator"`
+	Category    *Category `pg:"rel:has-one" json:"category"`
 	Description string    `json:"description"`
-	Like        []User    `pg:"many2many:post_likes,fk:post_id,join_fk:user_id" json:"like"`
+	Like        []*User   `pg:"many2many:post_likes,fk:post_id,join_fk:user_id" json:"like"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type Reply struct {
 	ID          uint      `json:"id"`
-	CurrentPost Post      `json:"current_post"`
-	Creator     User      `pg:"rel:has-one" json:"creator"`
+	CurrentPost *Post     `json:"current_post"`
+	Creator     *User     `pg:"rel:has-one" json:"creator"`
 	Description string    `json:"description"`
-	Like        []User    `pg:"many2many:reply_likes,fk:reply_id,join_fk:user_id" json:"like"`
+	Like        []*User   `pg:"many2many:reply_likes,fk:reply_id,join_fk:user_id" json:"like"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
 

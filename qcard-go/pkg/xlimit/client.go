@@ -10,7 +10,7 @@ type XLimitClientOptions struct {
 	Addr string
 }
 
-func NewClientWithConn(address string) *XLimitClient {
+func NewClientConn(address string) *grpc.ClientConn {
 
 	options := &XLimitClientOptions{Addr: address}
 
@@ -19,7 +19,6 @@ func NewClientWithConn(address string) *XLimitClient {
 		conn.Close()
 		log.Fatalf("did not connect: %v", err)
 	}
-	c := NewXLimitClient(conn)
 
-	return &c
+	return conn
 }

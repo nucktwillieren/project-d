@@ -35,8 +35,6 @@ class User(models.Model):
     exchange = models.TextField(_('exchange'), blank=True, null=True)
     trying = models.TextField(_('trying'), blank=True, null=True)
 
-    friends = models.ManyToManyField(
-        "qcard.friend", related_name="friend", blank=True, db_table="user_friends")
     pairing = models.ForeignKey(
         "qcard.friend", related_name="pairing", blank=True, null=True, on_delete=models.SET_NULL)
 
@@ -46,9 +44,9 @@ class User(models.Model):
 
 class Friend(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user1 = models.ForeignKey(
+    user_one = models.ForeignKey(
         'qcard.user', related_name='user1', on_delete=models.CASCADE)
-    user2 = models.ForeignKey(
+    user_two = models.ForeignKey(
         'qcard.user', related_name='user2', on_delete=models.CASCADE)
 
     pair = models.BooleanField(default=False)

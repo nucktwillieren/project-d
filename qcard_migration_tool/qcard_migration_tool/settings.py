@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import platform
 import os
 from pathlib import Path
 
@@ -76,16 +77,28 @@ WSGI_APPLICATION = 'qcard_migration_tool.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv("DBNAME"),
-        'USER': os.getenv("DBUSER"),
-        'PASSWORD': os.getenv("DBPASS"),
-        'HOST': os.getenv("DBHOST"),
-        'PORT': int(os.getenv("DBPORT")),
+if platform.platform() == "linux":
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.getenv("DBNAME"),
+            'USER': os.getenv("DBUSER"),
+            'PASSWORD': os.getenv("DBPASS"),
+            'HOST': os.getenv("DBHOST"),
+            'PORT': int(os.getenv("DBPORT")),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': "qcard",
+            'USER': "qcardu",
+            'PASSWORD': "qcardnumba1",
+            'HOST': "127.0.0.1",
+            'PORT': 54325,
+        }
+    }
 
 
 # Password validation

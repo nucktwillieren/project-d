@@ -12,21 +12,23 @@ import (
 	"github.com/nucktwillieren/project-d/qcard-go/pkg/auth"
 	"github.com/nucktwillieren/project-d/qcard-go/pkg/db"
 	"github.com/nucktwillieren/project-d/qcard-go/pkg/xlimit"
+	"google.golang.org/grpc"
 )
 
 var (
-	dbMap        map[string]*pg.DB
-	xLimitClient *xlimit.XLimitClient
+	dbMap      map[string]*pg.DB
+	clientConn *grpc.ClientConn
 )
 
 func init() {
 	dbMap = db.YamlToPGOptions(os.Getenv("QCARD_GO_DB_CONFIG_PATH"))
-	xLimitClient = xlimit.NewClientWithConn((os.Getenv("XLIMIT_GRPC_ADDR")))
+	clientConn = xlimit.NewClientConn((os.Getenv("XLIMIT_GRPC_ADDR")))
 }
 
 func Setup() *gin.Engine {
 	RouterBase := gin.Default()
 	secret := []byte(uuid.New().String())
+
 	RouterBase.Use(cors.New(cors.Config{
 		AllowOrigins: []string{"*"}, // In dev, allow all.
 		AllowMethods: []string{"GET", "POST", "HEAD", "PUT", "PATCH"},
@@ -68,9 +70,14 @@ func Setup() *gin.Engine {
 				category.POST("", handler.CreateCategory)
 			}
 
-			pair := jwtProtectedGroup.Group("pair")
+			pair := jwtProtectedGroup.Group("pair/")
+			pair.Use(xlimit.XlimitMiddlewareWithIPAndUser(clientConn))
 			{
-				pair.GET("", xlimit.XlimitMiddleware(xLimitClient, ""), handler.GetPair)
+				pair.GET("", handler.GetAllPair)
+				pair.GET(":username", handler.GetPair)
+				pair.POST(":username", handler.CreateRandomPair)
+				pair.PATCH("null", handler.SetPairingNull)
+				pair.DELETE("", handler.CleanPair)
 			}
 		}
 
