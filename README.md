@@ -54,6 +54,9 @@ Build完之後，因為Nginx的關係，他能將port 80導到frontend的port上
 - project-d-nginx
   - Reverse Proxy and Load Balancer
   - 在此專案中沒有使用Load Balancer
+  - 此contianer的image為Nginx
+  - evironment說明
+    - 無
 - project-d-qcard-frontend
   - Built by using React.js
   - 在此專案中連接到project-d-qcard-go中取得後端資訊
@@ -68,27 +71,58 @@ Build完之後，因為Nginx的關係，他能將port 80導到frontend的port上
       - ※備註：整個系統中需要至少兩個使用者以上才可以抽卡，因此若要測試，就需要註冊兩個
     - 創建貼文類型(創建看版)
     - 進入貼文類型(進入看版)
+  - 此contianer的image為React
+  - evironment說明
+    - 無
 - project-d-qcard-go
   - 本專案連接postgreSQL的api server
   - 本專案使用gin-gonic
   - 透過grpc連接project-d-xlimit-grpc
+  - 此contianer的image為Golang
 - project-d-qcard-pg
   - 儲存所有使用者資料
+  - 此contianer的image為postgreSQL
 - project-d-xlimit-redis
   - 儲存xlimit-rate的count，即題目所要求
+  - 此container的image為redis
+  - 為何使用redis作為收集count的DB?
+    - 像這次的題目要求，使用者都是短時距高流量，in-Memory DB才是比較快速的選擇
 - project-d-xlimit-grpc
   - 連接project-d-xlimit-redis，並透過grpc server跟外處溝通
   - 在此container的資料夾中，
-    -  cmd資料夾的client可以做單一identity的request test
-    -  cmd資料夾的random-create可以隨機產生identiy進行request test
-    -  cmd資料夾的get可以取得所有key跟value   
+    - cmd資料夾的client可以做單一identity的request test
+    - cmd資料夾的random-create可以隨機產生identiy進行request test
+    - cmd資料夾的get可以取得所有key跟value   
+  - evironment variables說明
+    - REDIS_ADDR: 為REDIS的位置
+    - REDIS_PASSWORD: REDIS的號碼
+    - REDIS_LAYER_PREFIX:REDIS存進去前的前綴
+    - REDIS_LAYER_LIMITNUM: 可以存取的最高上限次
+    - XLIMIT_GRPC_ADDR: GRPC container Server 內部的Port
 - project-d-migration_tool
   - 利用python scripts快速的建立Table與column及constraint
+  - evironment variables說明
+    - DBHOST為你這次要migrate的DB的主機
+    - DBPORT為你這次要migrate的DB的PORT
+    - DBNAME為你這次要migrate的DB的名稱
+    - DBUSER為你這次要migrate的DB的使用者
+    - DBPASS為你這次要migrate的DB的密碼
 
 ## 解釋
 ### 為何先透過grpc的一層封裝將redis DB藏在grpc server後方
 - 在分散式的系統中，我們可能會需要把關存取redis的關口，而grpc server恰好可以做到這件事情
+- grpc可以多語言共用
 - grpc速度比restful快
-### 為何在redis中是直接使用SET而不是HSET
-- 因為SET有EX(expire time)的選項
-- key儲存為該個人資訊，利用EX作為倒數計時
+### 如何實現IP檢查
+- 主要方法：將用戶資訊儲存於redis中
+- redis儲存方法：使用go-redis client driver library 
+- 儲存結構: 使用SET
+  - keyName 為 ip + url + method + user
+  - value 就是 重設前的 requests 次數
+  - expire_time 設多少 就是多久會重設一次
+- 須注意之事項
+  - 為了避免多用戶共用Public IP的情況下被誤封，因此在最後除了會有ip等之外，還會加入user來作為辨別
+  - 另外ip的部分因為前面有Nginx的存在，因此需要使用X-Forward-IP來取得真實IP
+- 為何在redis中是直接使用SET而不是HSET
+  - 因為SET有EX(expire time)的選項
+  - key儲存為該個人資訊，利用EX作為倒數計時
