@@ -67,7 +67,8 @@ const CardPick = () => {
       try {
         const resp = await axios.post(
           `http://localhost:8080/api/v1/pair/${initialUser}`,
-          config
+          {},
+          config,
         )
       } catch (error) {
       }
@@ -79,7 +80,7 @@ const CardPick = () => {
   return (
     <div className="container" >
       <div className="profile-container">
-        <div><h2>{username}</h2></div>
+        <div><h2>Pick</h2></div>
         <ColoredLine color="rgba(0, 0, 0, 0.4)"></ColoredLine>
         <div className="avatar"><img className="embedded-logo" src={process.env.PUBLIC_URL + '/logo192.png'} alt="" /></div>
         <div className="form-box">
