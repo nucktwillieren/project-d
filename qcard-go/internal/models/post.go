@@ -21,7 +21,9 @@ type Category struct {
 
 type Post struct {
 	ID          uint      `json:"id"`
+	CreatorID   uint      `json:"creatorId"`
 	Creator     *User     `pg:"rel:has-one" json:"creator"`
+	CategoryID  uint      `json:"categoryId"`
 	Category    *Category `pg:"rel:has-one" json:"category"`
 	Description string    `json:"description"`
 	Like        []*User   `pg:"many2many:post_likes,fk:post_id,join_fk:user_id" json:"like"`

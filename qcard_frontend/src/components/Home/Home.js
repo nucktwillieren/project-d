@@ -1,5 +1,5 @@
-function HomePage() {
-  return <h1>test</h1>
+const HomePage = () => {
+  return <></>
 }
 
 export { HomePage };

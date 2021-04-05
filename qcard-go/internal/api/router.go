@@ -33,9 +33,14 @@ func Setup() *gin.Engine {
 		AllowOrigins: []string{"*"}, // In dev, allow all.
 		AllowMethods: []string{"GET", "POST", "HEAD", "PUT", "PATCH"},
 		AllowHeaders: []string{"Authorization", "Content-Type", "Upgrade", "Origin",
-			"Connection", "Accept-Encoding", "Accept-Language", "Host", "Access-Control-Request-Method", "Access-Control-Request-Headers"},
+			"Connection", "Accept-Encoding", "Accept-Language", "Host",
+			"Access-Control-Request-Method", "Access-Control-Request-Headers",
+		},
 		ExposeHeaders: []string{"Authorization", "Content-Type", "Upgrade", "Origin",
-			"Connection", "Accept-Encoding", "Accept-Language", "Host", "Access-Control-Request-Method", "Access-Control-Request-Headers"},
+			"Connection", "Accept-Encoding", "Accept-Language", "Host",
+			"Access-Control-Request-Method", "Access-Control-Request-Headers",
+			"X-RateLimit-Reset", "X-RateLimit-Remaining",
+		},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
@@ -61,8 +66,7 @@ func Setup() *gin.Engine {
 
 			post := jwtProtectedGroup.Group("post/")
 			{
-				post.POST("", handler.CreatePost)
-				post.GET(":id")
+				post.POST(":category_name", handler.CreatePost)
 			}
 
 			category := jwtProtectedGroup.Group("category/")
@@ -83,13 +87,15 @@ func Setup() *gin.Engine {
 
 		noAuthGroup := v1.Group("")
 		{
-			post := noAuthGroup.Group("category/")
+			category := noAuthGroup.Group("category/")
 			{
-				post.GET("", handler.GetAllCategory)
+				category.GET("", handler.GetAllCategory)
+			}
+			post := noAuthGroup.Group("post/")
+			{
+				post.GET("", handler.GetPost)
 			}
 		}
-
-		//admin := v1.Group("admin/")
 	}
 
 	return RouterBase

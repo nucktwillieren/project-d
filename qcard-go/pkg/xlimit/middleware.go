@@ -54,13 +54,14 @@ func XlimitMiddlewareWithIPAndUser(conn *grpc.ClientConn) gin.HandlerFunc {
 		if err != nil && err != LimitExceedError {
 			log.Fatalf("could not check: %v", err)
 		}
-		if err != LimitExceedError {
+		if r.GetCountRemaining() != 0 {
 			log.Printf("Check %s: %v(Remain:%v)(Reset:%v)", r.GetIdentity(), r.GetIsAllowed(), r.GetCountRemaining(), r.GetTimeleft())
 			c.Header("X-RateLimit-Remaining", strconv.Itoa(int(r.GetCountRemaining())))
 			c.Header("X-RateLimit-Reset", strconv.Itoa(int(r.GetTimeleft())))
 		} else {
 			c.JSON(http.StatusTooManyRequests, gin.H{"err": "Too Many Requests"})
 			c.Abort()
+			return
 		}
 	}
 }

@@ -8,6 +8,8 @@ import TopNav from "./components/Basic/TopNav"
 import { VerifyAuth, RedirectIfAuth } from "./VerifyAuth"
 import { UserPage } from "./components/Dashboard/User"
 import { useSelector } from "react-redux"
+import { LeftNav } from "./components/Basic/LeftNav"
+import { CardPick } from "./components/CardPick/CardPick"
 
 const App = () => {
   const initialToken = useSelector(state => state.token)
@@ -21,7 +23,11 @@ const App = () => {
       <header className="App-header">
       </header>
       <BrowserRouter>
-        <TopNav user={user}></TopNav>
+        <TopNav user={user}>
+        </TopNav>
+
+        <LeftNav></LeftNav>
+        <div id="emptyBlock" style={{ height: "8vh" }}></div>
         <Switch>
           <Route path="/login">
             <RedirectIfAuth>
@@ -33,16 +39,17 @@ const App = () => {
               <Registration></Registration>
             </RedirectIfAuth>
           </Route>
-          <Route path="/logout" component={Logout} />
-          <Route path="/" component={HomePage} />
-          <Route path="/user">
-            <VerifyAuth>
+          <VerifyAuth>
+            <Route path="/logout" component={Logout} />
+            <Route path="/user">
               <UserPage />
-            </VerifyAuth>
-          </Route>
+            </Route>
+            <Route path="/pick" component={CardPick}></Route>
+            <Route path="/" component={HomePage} />
+          </VerifyAuth>
         </Switch>
       </BrowserRouter>
-    </div>
+    </div >
   );
 }
 

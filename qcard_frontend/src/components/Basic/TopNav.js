@@ -1,7 +1,15 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
+import './TopNav.css'
+import { useState } from "react";
+import { CreateCategoryCenteredModal, CreatePostCenteredModal } from "./LeftNav"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSignInAlt, faSdCard, faSignOutAlt, faUser, faUserPlus } from '@fortawesome/free-solid-svg-icons'
+import {
+  faSignInAlt, faSdCard,
+  faSignOutAlt, faUser,
+  faUserPlus, faPlus,
+  faIdCard, faPenAlt
+} from '@fortawesome/free-solid-svg-icons'
 
 const LogoutState = () => {
   return (
@@ -37,36 +45,48 @@ const UserState = (props) => {
 }
 
 const TopNav = (props) => {
+  const [modalShow, setModalShow] = useState(false);
+  const [postModalShow, setPostModalShow] = useState(false);
   const user = props.user
 
   return (
     <nav
-        className="navbar navbar-expand-lg navbar-light sticky-top"
-        style={{backgroundColor:'rgba(255, 255, 255, 0.6)'}}
+      className="navbar navbar-expand-lg navbar-light sticky-top"
     >
       <div className="container">
-        <a className="navbar-brand" href="/"><FontAwesomeIcon icon={faSdCard} style={{color: "#0168B7"}}/> QCard</a>
+        <a className="navbar-brand" href="/"><FontAwesomeIcon icon={faSdCard} style={{ color: "#0168B7" }} /> QCard</a>
         <button
-            className="navbar-toggler"
-            type="button"
-            data-toggle="collapse"
-            data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
+          className="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav ml-auto mb-2 mb-lg-0">
-              {
-                user 
+            <li className="nav-item">
+              <a className="nav-link" onClick={() => setModalShow(true)}>New Category <FontAwesomeIcon icon={faPlus} /></a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" onClick={() => setPostModalShow(true)}>New Post<FontAwesomeIcon icon={faPenAlt} /></a>
+            </li>
+            <li className="nav-item">
+              <a className="nav-link" href="/pick">Pick A Card <FontAwesomeIcon icon={faIdCard} /></a>
+            </li>
+            {
+              user
                 ? <><UserState user={user}></UserState><LogoutState></LogoutState></>
                 : <><LoginState></LoginState><RegistrationState></RegistrationState></>
-              }
+            }
           </ul>
         </div>
       </div>
+      <CreateCategoryCenteredModal show={modalShow} onHide={() => setModalShow(false)} />
+      <CreatePostCenteredModal show={postModalShow} onHide={() => setPostModalShow(false)} />
     </nav>
   )
 }
